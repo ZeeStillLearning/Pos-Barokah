@@ -61,7 +61,7 @@ final class LayananKatalog
     }
 
     /**
-     * @param array<string, mixed> $produk
+     * @param  array<string, mixed>  $produk
      * @return array<string, mixed>
      */
     private function format(array $produk): array

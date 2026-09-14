@@ -32,7 +32,7 @@ final class LayananKasir
      * Menghitung rincian struk tanpa menyimpannya.
      * Dipakai ulang oleh endpoint pratinjau maupun oleh proses().
      *
-     * @param array<int, array{sku: string, kuantitas: int}> $item
+     * @param  array<int, array{sku: string, kuantitas: int}>  $item
      * @return array<string, mixed>
      */
     public function hitung(array $item, bool $member = false): array
@@ -105,7 +105,7 @@ final class LayananKasir
     /**
      * Memproses satu penjualan dan menyimpan struknya.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     public function proses(array $data, string $kasir): array

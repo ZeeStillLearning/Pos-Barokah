@@ -21,7 +21,7 @@ final class PeranKasir
         if ($kasir === null || ! in_array($kasir['peran'], $peranDiizinkan, true)) {
             return response()->json([
                 'kesalahan' => 'peran_tidak_berwenang',
-                'pesan' => 'Aksi ini hanya boleh dilakukan oleh: ' . implode(', ', $peranDiizinkan) . '.',
+                'pesan' => 'Aksi ini hanya boleh dilakukan oleh: '.implode(', ', $peranDiizinkan).'.',
                 'peran_anda' => $kasir['peran'] ?? null,
             ], 403);
         }
