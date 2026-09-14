@@ -34,6 +34,9 @@ Route::prefix('v1/pos')
             ->middleware('jam.buka') // tambahan khusus rute ini
             ->name('transaksi.store');
 
+        Route::post('/pratinjau', [TransaksiController::class, 'pratinjau'])
+            ->name('pratinjau');    
+
         Route::get('/transaksi/{nomor}', [TransaksiController::class, 'show'])
             ->where('nomor', 'POS-[0-9]{8}-[0-9]{4}')
             ->name('transaksi.show');

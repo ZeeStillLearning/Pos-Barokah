@@ -68,4 +68,18 @@ final class TransaksiController extends Controller
             'data' => $this->kasir->batalkan($nomor, $data['alasan'], $kasir['nama']),
         ]);
     }
+
+    public function pratinjau(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'item' => ['required', 'array', 'min:1'],
+            'item.*.sku' => ['required', 'string'],
+            'item.*.kuantitas' => ['required', 'integer', 'min:1'],
+            'member' => ['sometimes', 'boolean'],
+        ]);
+
+        $rincian = $this->kasir->hitung($data['item'], (bool) ($data['member'] ?? false));
+
+        return response()->json(['data' => $rincian]);
+    }
 }
