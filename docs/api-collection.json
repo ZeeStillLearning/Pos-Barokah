@@ -1,0 +1,40 @@
+{
+  "info": {
+    "name": "POS Barokah Mart",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000/api" },
+    { "key": "kasir_key", "value": "kasir-dev-001" },
+    { "key": "supervisor_key", "value": "spv-dev-001" }
+  ],
+  "item": [
+    {
+      "name": "Ping",
+      "request": { "method": "GET", "url": "{{base_url}}/ping" }
+    },
+    {
+      "name": "Katalog Produk",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-Key", "value": "{{kasir_key}}" }],
+        "url": "{{base_url}}/v1/pos/produk"
+      }
+    },
+    {
+      "name": "Buat Transaksi",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-Key", "value": "{{kasir_key}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"item\":[{\"sku\":\"SKU-006\",\"kuantitas\":12}],\"metode_bayar\":\"tunai\",\"dibayar\":50000}"
+        },
+        "url": "{{base_url}}/v1/pos/transaksi"
+      }
+    }
+  ]
+}
