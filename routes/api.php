@@ -10,10 +10,9 @@ use Illuminate\Support\Facades\Route;
 // Rute publik: dipakai monitoring untuk memastikan layanan hidup.
 Route::get('/ping', fn () => response()->json([
     'status' => 'ok',
-    'toko' => config('pos.nama_toko'),
-    'waktu' => now()->toIso8601String(),
-]))->name('api.ping');
-
+]))
+    ->middleware('user-agent')
+    ->name('api.ping');
 Route::prefix('v1/pos')
     ->name('api.v1.pos.')
     ->middleware('kasir') // berlaku untuk SELURUH rute di dalam grup
