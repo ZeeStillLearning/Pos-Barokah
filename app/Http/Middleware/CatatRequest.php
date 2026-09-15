@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class CatatRequest
 {
+    private const AMBANG_DURASI_MS = 100;
+
     public function handle(Request $request, Closure $next): Response
     {
         $mulai = microtime(true);
@@ -25,17 +27,19 @@ final class CatatRequest
         $response = $next($request);
 
         $durasiMs = round((microtime(true) - $mulai) * 1000, 2);
+        $status = $response->getStatusCode();
 
-        logger()->info('POS.HTTP', [
-            'id' => $idRequest,
-            'method' => $request->method(),
-            'uri' => $request->path(),
-            'status' => $response->getStatusCode(),
-            'durasi_ms' => $durasiMs,
-            'kasir' => $request->attributes->get('kasir')['nama'] ?? '-',
-            'ip' => $request->ip(),
-        ]);
-
+        if ($durasiMs > self::AMBANG_DURASI_MS || $status >= 400) {
+            logger()->info('POS.HTTP', [
+                'id' => $idRequest,
+                'method' => $request->method(),
+                'uri' => $request->path(),
+                'status' => $status,
+                'durasi_ms' => $durasiMs,
+                'kasir' => $request->attributes->get('kasir')['nama'] ?? '-',
+                'ip' => $request->ip(),
+            ]);
+        }
         $response->headers->set('X-Request-Id', $idRequest);
         $response->headers->set('X-Response-Time', $durasiMs.'ms');
 

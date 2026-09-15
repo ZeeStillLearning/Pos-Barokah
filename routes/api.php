@@ -12,8 +12,9 @@ Route::get('/ping', fn() => response()->json([
     'status' => 'ok',
     'toko' => config('pos.nama_toko'),
     'waktu' => now()->toIso8601String(),
-]))->middleware('user-agent')->name('api.ping');;
-
+]))
+    ->middleware('user-agent')
+    ->name('api.ping');
 Route::prefix('v1/pos')
     ->name('api.v1.pos.')
     ->middleware('kasir') // berlaku untuk SELURUH rute di dalam grup
