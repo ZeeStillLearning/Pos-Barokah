@@ -22,6 +22,29 @@
       }
     },
     {
+      "name": "Detail Produk",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-Key", "value": "{{kasir_key}}" }],
+        "url": "{{base_url}}/v1/pos/produk/SKU-001"
+      }
+    },
+    {
+      "name": "Pratinjau Struk",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-Key", "value": "{{kasir_key}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"item\":[{\"sku\":\"SKU-006\",\"kuantitas\":12}],\"member\":true}"
+        },
+        "url": "{{base_url}}/v1/pos/pratinjau"
+      }
+    },
+    {
       "name": "Buat Transaksi",
       "request": {
         "method": "POST",
@@ -34,6 +57,53 @@
           "raw": "{\"item\":[{\"sku\":\"SKU-006\",\"kuantitas\":12}],\"metode_bayar\":\"tunai\",\"dibayar\":50000}"
         },
         "url": "{{base_url}}/v1/pos/transaksi"
+      }
+    },
+    {
+      "name": "Daftar Transaksi Hari Ini",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-Key", "value": "{{kasir_key}}" }],
+        "url": "{{base_url}}/v1/pos/transaksi"
+      }
+    },
+    {
+      "name": "Detail Transaksi",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-Key", "value": "{{kasir_key}}" }],
+        "url": "{{base_url}}/v1/pos/transaksi/POS-20260914-0001"
+      }
+    },
+    {
+      "name": "Batalkan Transaksi",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-Key", "value": "{{supervisor_key}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"alasan\":\"Pembeli membatalkan pesanan\"}"
+        },
+        "url": "{{base_url}}/v1/pos/transaksi/POS-20260914-0001/batal"
+      }
+    },
+    {
+      "name": "Laporan Harian",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-Key", "value": "{{supervisor_key}}" }],
+        "url": "{{base_url}}/v1/pos/laporan/harian"
+      }
+    },
+    {
+      "name": "Produk Terlaris",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "X-API-Key", "value": "{{supervisor_key}}" }],
+        "url": "{{base_url}}/v1/pos/laporan/terlaris?batas=3"
       }
     }
   ]
