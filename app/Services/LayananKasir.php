@@ -77,11 +77,17 @@ final class LayananKasir
             ];
         }
 
-        $diskonMember = $member // AB-3
+        $diskonMember = $member
             ? $subtotal->kurang($diskonItem)->persen((float) config('pos.member.persen'))
             : Uang::nol();
 
-        $totalDiskon = $diskonItem->tambah($diskonMember);
+        // AB-11 (latihan): diskon happy hour, dihitung dari subtotal setelah
+        // diskon grosir dan diskon member -- sama seperti pola AB-3.
+        $diskonHappyHour = $this->dalamJamHappyHour()
+            ? $subtotal->kurang($diskonItem)->kurang($diskonMember)->persen((float) config('pos.happy_hour.persen'))
+            : Uang::nol();
+
+        $totalDiskon = $diskonItem->tambah($diskonMember)->tambah($diskonHappyHour);
         $dpp = $subtotal->kurang($totalDiskon); // AB-4
         $ppn = $dpp->persen((float) config('pos.ppn_persen')); // AB-5
         $total = $dpp->tambah($ppn);
@@ -92,6 +98,7 @@ final class LayananKasir
             'subtotal' => $subtotal->rupiah,
             'diskon_grosir' => $diskonItem->rupiah,
             'diskon_member' => $diskonMember->rupiah,
+            'diskon_happy_hour' => $diskonHappyHour->rupiah,
             'total_diskon' => $totalDiskon->rupiah,
             'dpp' => $dpp->rupiah,
             'ppn' => $ppn->rupiah,
@@ -174,7 +181,7 @@ final class LayananKasir
     {
         return array_values(array_filter(
             $this->transaksi->semua(),
-            static fn (array $t): bool => str_starts_with($t['waktu'], $tanggal),
+            static fn(array $t): bool => str_starts_with($t['waktu'], $tanggal),
         ));
     }
 
@@ -196,9 +203,23 @@ final class LayananKasir
         $tanggal = now()->format('Ymd');
         $urut = count(array_filter(
             $this->transaksi->semua(),
-            static fn (array $t): bool => str_starts_with($t['nomor'], "POS-{$tanggal}"),
+            static fn(array $t): bool => str_starts_with($t['nomor'], "POS-{$tanggal}"),
         )) + 1;
 
         return sprintf('POS-%s-%04d', $tanggal, $urut);
+    }
+
+        /** AB-11: cek apakah waktu sekarang jatuh pada jam happy hour. */
+    private function dalamJamHappyHour(): bool
+    {
+        if (! (bool) config('pos.happy_hour.aktif')) {
+            return false;
+        }
+
+        $sekarang = now();
+        $mulai = now()->setTimeFromTimeString((string) config('pos.happy_hour.mulai'));
+        $selesai = now()->setTimeFromTimeString((string) config('pos.happy_hour.selesai'));
+
+        return $sekarang->gte($mulai) && $sekarang->lte($selesai);
     }
 }

@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\V1\TransaksiController;
 use Illuminate\Support\Facades\Route;
 
 // Rute publik: dipakai monitoring untuk memastikan layanan hidup.
-Route::get('/ping', fn () => response()->json([
+Route::get('/ping', fn() => response()->json([
     'status' => 'ok',
     'toko' => config('pos.nama_toko'),
     'waktu' => now()->toIso8601String(),
@@ -27,6 +27,9 @@ Route::prefix('v1/pos')
             ->where('sku', 'SKU-[0-9]{3}')
             ->name('produk.show');
 
+        Route::post('/pratinjau', [TransaksiController::class, 'pratinjau'])
+            ->name('pratinjau');
+
         /* ---------------- Transaksi ---------------- */
         Route::get('/transaksi', [TransaksiController::class, 'index'])
             ->name('transaksi.index');
@@ -36,7 +39,7 @@ Route::prefix('v1/pos')
             ->name('transaksi.store');
 
         Route::post('/pratinjau', [TransaksiController::class, 'pratinjau'])
-            ->name('pratinjau');    
+            ->name('pratinjau');
 
         Route::get('/transaksi/{nomor}', [TransaksiController::class, 'show'])
             ->where('nomor', 'POS-[0-9]{8}-[0-9]{4}')
