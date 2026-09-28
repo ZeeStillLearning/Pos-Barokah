@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             KategoriProdukSeeder::class,
             TransaksiContohSeeder::class,
             // Catatan dari cabang B
+            // Catatan dari cabang A
         ]);
     }
 }
