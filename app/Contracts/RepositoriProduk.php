@@ -19,4 +19,10 @@ interface RepositoriProduk
 
     /** @return array<string, mixed>|null */
     public function cariSku(string $sku): ?array;
+
+    /** Mengunci baris produk sampai transaksi selesai, lalu mengembalikan stok terkini. */
+    public function kunciStok(string $sku): int;
+
+    /** $selisih negatif mengurangi stok, positif mengembalikannya. */
+    public function ubahStok(string $sku, int $selisih): void;
 }
