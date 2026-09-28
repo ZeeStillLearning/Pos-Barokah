@@ -1,109 +1,799 @@
 {
   "info": {
-    "name": "POS Barokah Mart",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "_postman_id": "038a316b-bd34-40f4-a178-203eb21e6489",
+    "name": "Barokah Mart POS - Modul 4",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58573388",
+    "_collection_link": "https://go.postman.co/collection/58573388-038a316b-bd34-40f4-a178-203eb21e6489?source=collection_link"
   },
-  "variable": [
-    { "key": "base_url", "value": "http://127.0.0.1:8000/api" },
-    { "key": "kasir_key", "value": "kasir-dev-001" },
-    { "key": "supervisor_key", "value": "spv-dev-001" }
-  ],
   "item": [
     {
-      "name": "Ping",
-      "request": { "method": "GET", "url": "{{base_url}}/ping" }
+      "name": "00 Kesehatan Layanan",
+      "item": [
+        {
+          "name": "Ping",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ping",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ping"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
-      "name": "Katalog Produk",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "X-API-Key", "value": "{{kasir_key}}" }],
-        "url": "{{base_url}}/v1/pos/produk"
-      }
-    },
-    {
-      "name": "Detail Produk",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "X-API-Key", "value": "{{kasir_key}}" }],
-        "url": "{{base_url}}/v1/pos/produk/SKU-001"
-      }
-    },
-    {
-      "name": "Pratinjau Struk",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "X-API-Key", "value": "{{kasir_key}}" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"item\":[{\"sku\":\"SKU-006\",\"kuantitas\":12}],\"member\":true}"
+      "name": "01 Katalog Produk",
+      "item": [
+        {
+          "name": "Daftar produk",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/pos/produk",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "produk"
+              ]
+            }
+          },
+          "response": []
         },
-        "url": "{{base_url}}/v1/pos/pratinjau"
-      }
-    },
-    {
-      "name": "Buat Transaksi",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "X-API-Key", "value": "{{kasir_key}}" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"item\":[{\"sku\":\"SKU-006\",\"kuantitas\":12}],\"metode_bayar\":\"tunai\",\"dibayar\":50000}"
+        {
+          "name": "Daftar produk (kategori=minuman)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/pos/produk?kategori=minuman",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "produk"
+              ],
+              "query": [
+                {
+                  "key": "kategori",
+                  "value": "minuman"
+                }
+              ]
+            }
+          },
+          "response": []
         },
-        "url": "{{base_url}}/v1/pos/transaksi"
-      }
-    },
-    {
-      "name": "Daftar Transaksi Hari Ini",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "X-API-Key", "value": "{{kasir_key}}" }],
-        "url": "{{base_url}}/v1/pos/transaksi"
-      }
-    },
-    {
-      "name": "Detail Transaksi",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "X-API-Key", "value": "{{kasir_key}}" }],
-        "url": "{{base_url}}/v1/pos/transaksi/POS-20260914-0001"
-      }
-    },
-    {
-      "name": "Batalkan Transaksi",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "X-API-Key", "value": "{{supervisor_key}}" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"alasan\":\"Pembeli membatalkan pesanan\"}"
+        {
+          "name": "Detail produk SKU-004",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/pos/produk/SKU-004",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "produk",
+                "SKU-004"
+              ]
+            }
+          },
+          "response": []
         },
-        "url": "{{base_url}}/v1/pos/transaksi/POS-20260914-0001/batal"
+        {
+          "name": "Produk tidak ada (SKU-999)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/pos/produk/SKU-999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "produk",
+                "SKU-999"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 Transaksi",
+      "item": [
+        {
+          "name": "Transaksi member tunai",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "",
+                  "const struk = pm.response.json().data;",
+                  "pm.test('AB-1 subtotal = 101.800', function () { pm.expect(struk.subtotal).to.eql(101800); });",
+                  "pm.test('AB-2 diskon grosir', function () { pm.expect(struk.diskon_grosir).to.eql(2040); });",
+                  "pm.test('AB-3 diskon member', function () { pm.expect(struk.diskon_member).to.eql(2993); });",
+                  "pm.test('AB-5 PPN dari DPP', function () {",
+                  "    pm.expect(struk.dpp).to.eql(96767);",
+                  "    pm.expect(struk.ppn).to.eql(10644);",
+                  "});",
+                  "pm.test('AB-6 total dibulatkan', function () {",
+                  "    pm.expect(struk.total_bayar % 100).to.eql(0);",
+                  "    pm.expect(struk.total_bayar).to.eql(107500);",
+                  "});",
+                  "pm.test('AB-7 kembalian', function () {",
+                  "    pm.expect(struk.kembalian).to.eql(struk.dibayar - struk.total_bayar);",
+                  "});",
+                  "pm.environment.set('nomor_struk', struk.nomor);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item\": [\n    {\n      \"sku\": \"SKU-006\",\n      \"kuantitas\": 12\n    },\n    {\n      \"sku\": \"SKU-002\",\n      \"kuantitas\": 2\n    },\n    {\n      \"sku\": \"SKU-004\",\n      \"kuantitas\": 1\n    }\n  ],\n  \"member\": true,\n  \"metode_bayar\": \"tunai\",\n  \"dibayar\": 150000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/pos/transaksi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "transaksi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Detail struk",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/pos/transaksi/{{nomor_struk}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "transaksi",
+                "{{nomor_struk}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transaksi stok habis (SKU-005)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 422', function () { pm.response.to.have.status(422); });",
+                  "",
+                  "pm.test('Kode kesalahan domain', function () {",
+                  "    pm.expect(pm.response.json().kesalahan).to.eql('stok_tidak_cukup');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item\": [\n    {\n      \"sku\": \"SKU-005\",\n      \"kuantitas\": 2\n    }\n  ],\n  \"metode_bayar\": \"tunai\",\n  \"dibayar\": 50000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/pos/transaksi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "transaksi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transaksi pembayaran kurang",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 422', function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item\": [\n    {\n      \"sku\": \"SKU-002\",\n      \"kuantitas\": 1\n    }\n  ],\n  \"metode_bayar\": \"tunai\",\n  \"dibayar\": 1000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/pos/transaksi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "transaksi"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Batal oleh kasir",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alasan\": \"Pembeli membatalkan pesanan\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/pos/transaksi/{{nomor_struk}}/batal",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "transaksi",
+                "{{nomor_struk}}",
+                "batal"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 Otorisasi dan Pembatalan",
+      "item": [
+        {
+          "name": "Batal oleh supervisor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "",
+                  "pm.test('Status struk batal', function () {",
+                  "    pm.expect(pm.response.json().data.status).to.eql('batal');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "X-API-Key",
+                  "type": "string"
+                },
+                {
+                  "key": "value",
+                  "value": "{{kunci_supervisor}}",
+                  "type": "string"
+                },
+                {
+                  "key": "in",
+                  "value": "header",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alasan\": \"Pembeli membatalkan pesanan\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/pos/transaksi/{{nomor_struk}}/batal",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "transaksi",
+                "{{nomor_struk}}",
+                "batal"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Batal untuk kedua kalinya",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "X-API-Key",
+                  "type": "string"
+                },
+                {
+                  "key": "value",
+                  "value": "{{kunci_supervisor}}",
+                  "type": "string"
+                },
+                {
+                  "key": "in",
+                  "value": "header",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alasan\": \"Pembeli membatalkan pesanan\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/pos/transaksi/{{nomor_struk}}/batal",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "transaksi",
+                "{{nomor_struk}}",
+                "batal"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Stok SKU-006 setelah pembatalan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "",
+                  "pm.test('Stok SKU-006 kembali 468', function () {",
+                  "    pm.expect(pm.response.json().data.stok).to.eql(468);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/pos/produk/SKU-006",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "produk",
+                "SKU-006"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 Laporan",
+      "item": [
+        {
+          "name": "Laporan harian",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "",
+                  "const laporan = pm.response.json().data;",
+                  "pm.test('Struk batal tidak ikut dihitung', function () {",
+                  "    pm.expect(laporan.jumlah_transaksi).to.eql(2);",
+                  "    pm.expect(laporan.omzet).to.eql(250700);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "X-API-Key",
+                  "type": "string"
+                },
+                {
+                  "key": "value",
+                  "value": "{{kunci_supervisor}}",
+                  "type": "string"
+                },
+                {
+                  "key": "in",
+                  "value": "header",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/pos/laporan/harian?tanggal={{tanggal}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "laporan",
+                "harian"
+              ],
+              "query": [
+                {
+                  "key": "tanggal",
+                  "value": "{{tanggal}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Produk terlaris",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "X-API-Key",
+                  "type": "string"
+                },
+                {
+                  "key": "value",
+                  "value": "{{kunci_supervisor}}",
+                  "type": "string"
+                },
+                {
+                  "key": "in",
+                  "value": "header",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/pos/laporan/terlaris?tanggal={{tanggal}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "pos",
+                "laporan",
+                "terlaris"
+              ],
+              "query": [
+                {
+                  "key": "tanggal",
+                  "value": "{{tanggal}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-API-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{kunci_kasir}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "const hariIni = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' });",
+          "pm.environment.set('tanggal', hariIni);"
+        ],
+        "type": "text/javascript"
       }
     },
     {
-      "name": "Laporan Harian",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "X-API-Key", "value": "{{supervisor_key}}" }],
-        "url": "{{base_url}}/v1/pos/laporan/harian"
-      }
-    },
-    {
-      "name": "Produk Terlaris",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "X-API-Key", "value": "{{supervisor_key}}" }],
-        "url": "{{base_url}}/v1/pos/laporan/terlaris?batas=3"
+      "listen": "test",
+      "script": {
+        "exec": [
+          "pm.test('Response berformat JSON', function () { pm.response.to.be.json; });",
+          "pm.test('Response di bawah 10 detik', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+          "});",
+          "pm.test('Header pelacakan CatatRequest ada', function () {",
+          "    pm.response.to.have.header('X-Request-Id');",
+          "    pm.response.to.have.header('X-Response-Time');",
+          "});"
+        ],
+        "type": "text/javascript"
       }
     }
   ]
