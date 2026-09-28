@@ -27,7 +27,7 @@ final class RepositoriTransaksiEloquent implements RepositoriTransaksi
     public function simpan(array $transaksi): void
     {
         $item = $transaksi['item'];
-        unset($transaksi['item']);
+        unset($transaksi['item'], $transaksi['total_bayar_format']);
 
         $baris = Transaksi::create($transaksi);
 
@@ -36,7 +36,7 @@ final class RepositoriTransaksiEloquent implements RepositoriTransaksi
             ->pluck('id', 'sku');
 
         ItemTransaksi::insert(array_map(
-            static fn (array $b): array => [
+            static fn(array $b): array => [
                 'transaksi_id' => $baris->id,
                 'produk_id' => $idProduk[$b['sku']],
                 'sku' => $b['sku'],
@@ -70,13 +70,14 @@ final class RepositoriTransaksiEloquent implements RepositoriTransaksi
         $item = ItemTransaksi::query()
             ->where('transaksi_id', $transaksi->id)
             ->get(['sku', 'nama_produk', 'harga_satuan', 'kuantitas', 'diskon', 'total'])
-            ->map(static fn (ItemTransaksi $i): array => [
+            ->map(static fn(ItemTransaksi $i): array => [
                 'sku' => $i->sku,
                 'nama' => $i->nama_produk,
                 'harga_satuan' => $i->harga_satuan,
                 'kuantitas' => $i->kuantitas,
                 'diskon' => $i->diskon,
                 'total' => $i->total,
+                'total_format' => (new \App\Domain\Uang($i->total))->format(),
             ])->all();
 
         return [
@@ -98,6 +99,7 @@ final class RepositoriTransaksiEloquent implements RepositoriTransaksi
             'total' => $transaksi->total,
             'pembulatan' => $transaksi->pembulatan,
             'total_bayar' => $transaksi->total_bayar,
+            'total_bayar_format' => (new \App\Domain\Uang($transaksi->total_bayar))->format(),
             'dibayar' => $transaksi->dibayar,
             'kembalian' => $transaksi->kembalian,
         ];
