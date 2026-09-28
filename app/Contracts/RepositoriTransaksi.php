@@ -6,8 +6,8 @@ namespace App\Contracts;
 
 interface RepositoriTransaksi
 {
-    /** @return array<string, array<string, mixed>> dikunci oleh nomor struk */
-    public function semua(): array;
+    /** @return array<int, array<string, mixed>> */
+    public function tanggal(string $tanggal): array;
 
     /** @return array<string, mixed>|null */
     public function cariNomor(string $nomor): ?array;
@@ -17,4 +17,6 @@ interface RepositoriTransaksi
 
     /** @param array<string, mixed> $perubahan */
     public function perbarui(string $nomor, array $perubahan): void;
+
+    public function urutanBerikutnya(string $tanggal): int;
 }

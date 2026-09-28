@@ -13,6 +13,8 @@ use App\Exceptions\ProdukTidakDitemukan;
 use App\Exceptions\StokTidakCukup;
 use App\Exceptions\TransaksiSudahDibatalkan;
 use App\Exceptions\TransaksiTidakDitemukan;
+use App\Domain\StatusTransaksi;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Inti aturan bisnis kasir (AB-1 s.d. AB-10).
@@ -117,72 +119,87 @@ final class LayananKasir
      */
     public function proses(array $data, string $kasir): array
     {
-        $metode = MetodeBayar::from($data['metode_bayar']);
-        $member = (bool) ($data['member'] ?? false);
+        return DB::transaction(function () use ($data, $kasir): array {
+            // 1. Kunci baris produk lalu periksa ulang stok (AB-8)
+            foreach ($data['item'] as $baris) {
+                $tersedia = $this->produk->kunciStok($baris['sku']);
+                if ($baris['kuantitas'] > $tersedia) {
+                    throw new StokTidakCukup($baris['sku'], (int) $baris['kuantitas'], $tersedia);
+                }
+            }
 
-        $rincian = $this->hitung($data['item'], $member);
-        $totalBayar = new Uang($rincian['total_bayar']);
+            // 2. Hitung nilai uang
+            $metode = MetodeBayar::from($data['metode_bayar']);
+            $member = (bool) ($data['member'] ?? false);
+            $rincian = $this->hitung($data['item'], $member);
+            $totalBayar = new Uang($rincian['total_bayar']);
 
-        // AB-7: pembayaran non-tunai dianggap selalu pas.
-        $dibayar = match ($metode->butuhKembalian()) {
-            true => new Uang((int) ($data['dibayar'] ?? 0)),
-            false => $totalBayar,
-        };
+            $dibayar = $metode->butuhKembalian()                       // AB-7
+                ? new Uang((int) ($data['dibayar'] ?? 0))
+                : $totalBayar;
 
-        if ($dibayar->kurangDari($totalBayar)) { // AB-9
-            throw new PembayaranKurang($totalBayar->kurang($dibayar));
-        }
+            if ($dibayar->kurangDari($totalBayar)) {                   // AB-9
+                throw new PembayaranKurang($totalBayar->kurang($dibayar));
+            }
 
-        $transaksi = array_merge([
-            'nomor' => $this->nomorBaru(),
-            'waktu' => now()->toIso8601String(),
-            'kasir' => $kasir,
-            'member' => $member,
-            'metode_bayar' => $metode->value,
-            'metode_label' => $metode->label(),
-            'status' => 'selesai',
-        ], $rincian, [
-            'dibayar' => $dibayar->rupiah,
-            'kembalian' => $dibayar->kurang($totalBayar)->rupiah,
-        ]);
+            // 3. Susun dan simpan struk
+            $transaksi = array_merge([
+                'nomor' => $this->nomorBaru(),
+                'kasir' => $kasir,
+                'member' => $member,
+                'metode_bayar' => $metode->value,
+                'status' => StatusTransaksi::Selesai->value,
+            ], $rincian, [
+                'dibayar' => $dibayar->rupiah,
+                'kembalian' => $dibayar->kurang($totalBayar)->rupiah,
+            ]);
 
-        $this->transaksi->simpan($transaksi);
+            $this->transaksi->simpan($transaksi);
 
-        return $transaksi;
+            // 4. Kurangi stok (AB-11)
+            foreach ($data['item'] as $baris) {
+                $this->produk->ubahStok($baris['sku'], -1 * (int) $baris['kuantitas']);
+            }
+
+            return $this->transaksi->cariNomor($transaksi['nomor']);
+        });
     }
 
     /** @return array<string, mixed> */
     public function batalkan(string $nomor, string $alasan, string $olehKasir): array
     {
-        $transaksi = $this->transaksi->cariNomor($nomor);
+        return DB::transaction(function () use ($nomor, $alasan, $olehKasir): array {
+            $transaksi = $this->transaksi->cariNomor($nomor);
 
-        if ($transaksi === null) {
-            throw new TransaksiTidakDitemukan($nomor); // -> 404
-        }
+            if ($transaksi === null) {
+                throw new TransaksiTidakDitemukan($nomor);             // 404
+            }
 
-        if ($transaksi['status'] === 'batal') { // AB-10
-            throw new TransaksiSudahDibatalkan($nomor); // -> 409
-        }
+            if ($transaksi['status'] === StatusTransaksi::Batal->value) {
+                throw new TransaksiSudahDibatalkan($nomor);            // 409, AB-10
+            }
 
-        $perubahan = [
-            'status' => 'batal',
-            'alasan_batal' => $alasan,
-            'dibatalkan_oleh' => $olehKasir,
-            'dibatalkan_pada' => now()->toIso8601String(),
-        ];
+            $this->transaksi->perbarui($nomor, [
+                'status' => StatusTransaksi::Batal->value,
+                'alasan_batal' => $alasan,
+                'dibatalkan_oleh' => $olehKasir,
+                'dibatalkan_pada' => now(),
+            ]);
 
-        $this->transaksi->perbarui($nomor, $perubahan);
+            // AB-11: barang kembali ke rak
+            foreach ($transaksi['item'] as $baris) {
+                $this->produk->ubahStok($baris['sku'], (int) $baris['kuantitas']);
+            }
 
-        return array_merge($transaksi, $perubahan);
+            return $this->transaksi->cariNomor($nomor);
+        });
     }
+
 
     /** @return array<int, array<string, mixed>> */
     public function transaksiTanggal(string $tanggal): array
     {
-        return array_values(array_filter(
-            $this->transaksi->semua(),
-            static fn(array $t): bool => str_starts_with($t['waktu'], $tanggal),
-        ));
+        return $this->transaksi->tanggal($tanggal);
     }
 
     /** @return array<string, mixed> */
@@ -200,16 +217,14 @@ final class LayananKasir
     /** Nomor struk berformat POS-YYYYMMDD-0001, berulang tiap hari. */
     private function nomorBaru(): string
     {
-        $tanggal = now()->format('Ymd');
-        $urut = count(array_filter(
-            $this->transaksi->semua(),
-            static fn(array $t): bool => str_starts_with($t['nomor'], "POS-{$tanggal}"),
-        )) + 1;
-
-        return sprintf('POS-%s-%04d', $tanggal, $urut);
+        return sprintf(
+            'POS-%s-%04d',
+            now()->format('Ymd'),
+            $this->transaksi->urutanBerikutnya(now()->toDateString()),
+        );
     }
 
-        /** AB-11: cek apakah waktu sekarang jatuh pada jam happy hour. */
+    /** AB-11: cek apakah waktu sekarang jatuh pada jam happy hour. */
     private function dalamJamHappyHour(): bool
     {
         if (! (bool) config('pos.happy_hour.aktif')) {
