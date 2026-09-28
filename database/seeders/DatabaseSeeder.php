@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             KategoriProdukSeeder::class,
             TransaksiContohSeeder::class,
+            // Catatan dari cabang B
         ]);
     }
 }
