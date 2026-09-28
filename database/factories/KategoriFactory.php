@@ -26,8 +26,9 @@ class KategoriFactory extends Factory
             'aktif' => true,
         ];
     }
+
     public function nonaktif(): static
     {
-        return $this->state(fn() => ['aktif' => false]);
+        return $this->state(fn () => ['aktif' => false]);
     }
 }

@@ -1,0 +1,40 @@
+{
+	"id": "feb4cf41-1c09-4e71-a8cc-e504463ef0de",
+	"name": "POS Lokal",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "kunci_kasir",
+			"type": "default",
+			"enabled": true,
+			"secret": true
+		},
+		{
+			"key": "kunci_supervisor",
+			"type": "default",
+			"enabled": true,
+			"secret": true
+		},
+		{
+			"key": "nomor_struk",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "tanggal",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"color": null,
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2026-09-28T10:05:57.434Z",
+	"_postman_exported_using": "Postman/12.29.5"
+}

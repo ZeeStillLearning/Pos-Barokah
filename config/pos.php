@@ -31,7 +31,7 @@ return [
         'persen' => (float) env('POS_GROSIR_PERSEN', 5),
     ],
 
-    // AB-11 (latihan): diskon tambahan pada jam ramai sepi (happy hour)
+    // AB-13 (latihan): diskon tambahan pada jam ramai sepi (happy hour)
     'happy_hour' => [
         'aktif' => (bool) env('POS_HAPPY_HOUR_AKTIF', true),
         'mulai' => env('POS_HAPPY_HOUR_MULAI', '14:00'),
