@@ -7,13 +7,13 @@ namespace App\Services;
 use App\Contracts\RepositoriProduk;
 use App\Contracts\RepositoriTransaksi;
 use App\Domain\MetodeBayar;
+use App\Domain\StatusTransaksi;
 use App\Domain\Uang;
 use App\Exceptions\PembayaranKurang;
 use App\Exceptions\ProdukTidakDitemukan;
 use App\Exceptions\StokTidakCukup;
 use App\Exceptions\TransaksiSudahDibatalkan;
 use App\Exceptions\TransaksiTidakDitemukan;
-use App\Domain\StatusTransaksi;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -83,7 +83,7 @@ final class LayananKasir
             ? $subtotal->kurang($diskonItem)->persen((float) config('pos.member.persen'))
             : Uang::nol();
 
-        // AB-11 (latihan): diskon happy hour, dihitung dari subtotal setelah
+        // AB-13 (latihan): diskon happy hour, dihitung dari subtotal setelah
         // diskon grosir dan diskon member -- sama seperti pola AB-3.
         $diskonHappyHour = $this->dalamJamHappyHour()
             ? $subtotal->kurang($diskonItem)->kurang($diskonMember)->persen((float) config('pos.happy_hour.persen'))
@@ -195,7 +195,6 @@ final class LayananKasir
         });
     }
 
-
     /** @return array<int, array<string, mixed>> */
     public function transaksiTanggal(string $tanggal): array
     {
@@ -224,7 +223,7 @@ final class LayananKasir
         );
     }
 
-    /** AB-11: cek apakah waktu sekarang jatuh pada jam happy hour. */
+    /** AB-13: cek apakah waktu sekarang jatuh pada jam happy hour. */
     private function dalamJamHappyHour(): bool
     {
         if (! (bool) config('pos.happy_hour.aktif')) {

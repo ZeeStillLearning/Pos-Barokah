@@ -8,11 +8,9 @@ use App\Contracts\RepositoriPengguna;
 use App\Contracts\RepositoriProduk;
 use App\Contracts\RepositoriTransaksi;
 use App\Repositories\RepositoriPenggunaConfig;
-use App\Repositories\RepositoriProdukArray;
-use App\Repositories\RepositoriTransaksiBerkas;
-use Illuminate\Support\ServiceProvider;
 use App\Repositories\RepositoriProdukEloquent;
 use App\Repositories\RepositoriTransaksiEloquent;
+use Illuminate\Support\ServiceProvider;
 
 final class AppServiceProvider extends ServiceProvider
 {
