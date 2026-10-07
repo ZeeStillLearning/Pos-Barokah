@@ -2,6 +2,7 @@
 
 use App\Exceptions\KesalahanPos;
 use App\Http\Middleware\CatatRequest;
+use App\Http\Middleware\HitungKueri;
 use App\Http\Middleware\JamOperasional;
 use App\Http\Middleware\KunciApiKasir;
 use App\Http\Middleware\PeranKasir;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->api(append: [
             CatatRequest::class,
+            HitungKueri::class,
         ]);
 
         $middleware->alias([

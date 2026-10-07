@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Produk;
+use App\Models\Transaksi;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class ItemTransaksi extends Model
 {
@@ -22,9 +25,19 @@ final class ItemTransaksi extends Model
     {
         return [
             'harga_satuan' => 'integer',
-            'kuantitas' => 'integer',
-            'diskon' => 'integer',
-            'total' => 'integer',
+            'kuantitas'    => 'integer',
+            'diskon'       => 'integer',
+            'total'        => 'integer',
         ];
+    }
+
+    public function transaksi(): BelongsTo
+    {
+        return $this->belongsTo(Transaksi::class, 'transaksi_id');
+    }
+
+    public function produk(): BelongsTo
+    {
+        return $this->belongsTo(Produk::class, 'produk_id')->withTrashed();
     }
 }
