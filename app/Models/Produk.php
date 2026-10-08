@@ -7,6 +7,8 @@ namespace App\Models;
 use App\Domain\Uang;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 final class Produk extends Model
@@ -21,6 +23,19 @@ final class Produk extends Model
     protected function casts(): array
     {
         return ['harga' => 'integer', 'stok' => 'integer', 'aktif' => 'boolean'];
+    }
+
+    public function kategori(): BelongsTo
+    {
+        return $this->belongsTo(Kategori::class, 'kategori_id');
+    }
+
+    public function pemasok(): BelongsToMany
+    {
+        return $this->belongsToMany(Pemasok::class, 'pemasok_produk')
+            ->as('pasokan')
+            ->withPivot(['harga_beli', 'utama'])
+            ->withTimestamps();
     }
 
     public function scopeAktif($query)
