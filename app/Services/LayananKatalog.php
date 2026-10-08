@@ -9,14 +9,8 @@ use App\Domain\Kategori;
 use App\Domain\Uang;
 use App\Exceptions\ProdukTidakDitemukan;
 
-/**
- * Layanan katalog produk.
- * Tidak mengenal Request, response(), maupun status HTTP.
- */
 final class LayananKatalog
 {
-    // Laravel menyuntikkan implementasi RepositoriProduk secara otomatis
-    // berdasarkan binding di AppServiceProvider.
     public function __construct(
         private readonly RepositoriProduk $repositori,
     ) {}
@@ -43,8 +37,6 @@ final class LayananKatalog
             );
         }
 
-        // array_values() mengembalikan indeks berurutan agar JSON
-        // dirender sebagai array, bukan sebagai object.
         return array_values(array_map($this->format(...), $produk));
     }
 
@@ -58,6 +50,32 @@ final class LayananKatalog
         }
 
         return $this->format($produk);
+    }
+
+    /**
+     * Pemasok sebuah produk beserta marginnya (AB-13).
+     * @return array<string, mixed>
+     */
+    public function pemasok(string $sku): array
+    {
+        $produk = $this->repositori->cariPemasok($sku);
+
+        if ($produk === null) {
+            throw new ProdukTidakDitemukan($sku);
+        }
+
+        $produk['pemasok'] = array_map(
+            static function (array $p) use ($produk): array {
+                $margin = $produk['harga'] - $p['harga_beli'];
+                return $p + [
+                    'margin'        => $margin,
+                    'margin_persen' => round($margin * 100 / $produk['harga'], 1),
+                ];
+            },
+            $produk['pemasok'],
+        );
+
+        return $produk;
     }
 
     /**

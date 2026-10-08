@@ -40,4 +40,11 @@ final class ProdukController extends Controller
             'data' => $this->katalog->ambil($sku),
         ]);
     }
+
+    public function pemasok(string $sku): JsonResponse
+    {
+        return response()->json([
+            'data' => $this->katalog->pemasok($sku),
+        ]);
+    }
 }
