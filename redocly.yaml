@@ -1,7 +1,11 @@
+# Konfigurasi Linter Kontrak OpenAPI 3.1 — POS Barokah Mart
+# Diverifikasi oleh: Zaki (Anggota 5)
 extends:
   - recommended
 
 rules:
+  # Dokumen internal tim, lisensi belum diwajibkan
   info-license: off
+  # Naikkan validasi contoh payload menjadi galat mutlak (error)
   no-invalid-media-type-examples: error
   no-invalid-schema-examples: error
