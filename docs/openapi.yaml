@@ -1,5 +1,4 @@
 openapi: 3.1.0
-
 info:
   title: API Kasir Barokah Mart
   version: 0.5.0
@@ -9,9 +8,14 @@ info:
     **Konvensi umum**
     - Seluruh nilai uang berupa **bilangan bulat rupiah** (tanpa desimal).
     - Setiap permintaan wajib membawa header `Accept: application/json`.
-    - Kesalahan domain selalu berbentuk `{ "kesalahan": "...", "pesan": "..." }` ditambah konteks sesuai jenis kesalahannya.
-    - Kesalahan validasi bentuk masukan memakai format bawaan Laravel `{ "message": "...", "errors": { ... } }`.
-    **Aturan bisnis** yang disebut pada deskripsi endpoint (AB-1 s.d. AB-14) mengacu pada tabel aturan bisnis di dokumen Hands-On.
+    - Kesalahan domain selalu berbentuk `{ "kesalahan": "...", "pesan": "..." }`
+      ditambah konteks sesuai jenis kesalahannya.
+    - Kesalahan validasi bentuk masukan memakai format bawaan Laravel
+      `{ "message": "...", "errors": { ... } }`.
+    **Aturan bisnis** yang disebut pada deskripsi endpoint (AB-1 s.d. AB-14)
+    mengacu pada tabel aturan bisnis di dokumen Hands-On.
+    Versi dokumen naik setiap kali kontrak berubah. Versi 1.0.0 dirilis
+    bersama tag rilis akhir proyek.
   contact:
     name: Tim Back End Barokah Mart
     email: backend@barokah-mart.test
@@ -33,188 +37,6 @@ tags:
   - name: Laporan
     description: Ringkasan penjualan per tanggal.
 
-components:
-  securitySchemes:
-    KunciApi:
-      type: apiKey
-      in: header
-      name: X-API-Key
-      description: Kunci akses kasir atau supervisor.
-
-  parameters:
-    Sku:
-      name: sku
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^SKU-[0-9]{3}$'
-      example: SKU-004
-
-  schemas:
-    Rupiah:
-      type: integer
-      minimum: 0
-      example: 24000
-
-    MetodeBayar:
-      type: string
-      enum: [tunai, kartu_debit, qris]
-
-    Kesalahan:
-      type: object
-      required: [kesalahan, pesan]
-      properties:
-        kesalahan: { type: string }
-        pesan: { type: string }
-
-    KesalahanValidasi:
-      type: object
-      required: [message, errors]
-      properties:
-        message: { type: string }
-        errors:
-          type: object
-          additionalProperties:
-            type: array
-            items: { type: string }
-
-    ItemStruk:
-      type: object
-      required: [sku, nama, harga_satuan, kuantitas, diskon, total]
-      properties:
-        sku: { type: string }
-        nama: { type: string }
-        harga_satuan: { $ref: '#/components/schemas/Rupiah' }
-        kuantitas: { type: integer, minimum: 1 }
-        diskon: { $ref: '#/components/schemas/Rupiah' }
-        total: { $ref: '#/components/schemas/Rupiah' }
-
-    Struk:
-      type: object
-      required:
-        - nomor
-        - waktu
-        - kasir
-        - member
-        - metode_bayar
-        - metode_label
-        - status
-        - item
-        - subtotal
-        - diskon_grosir
-        - diskon_member
-        - total_diskon
-        - dpp
-        - ppn
-        - total
-        - pembulatan
-        - total_bayar
-        - dibayar
-        - kembalian
-        - alasan_batal
-        - dibatalkan_oleh
-        - dibatalkan_pada
-      properties:
-        nomor: { type: string, pattern: '^POS-[0-9]{8}-[0-9]{4}$' }
-        waktu: { type: string, format: date-time }
-        kasir: { type: string }
-        member: { type: boolean }
-        metode_bayar: { $ref: '#/components/schemas/MetodeBayar' }
-        metode_label: { type: string }
-        status: { type: string, enum: [selesai, batal] }
-        item:
-          type: array
-          minItems: 1
-          items: { $ref: '#/components/schemas/ItemStruk' }
-        subtotal: { $ref: '#/components/schemas/Rupiah' }
-        diskon_grosir: { $ref: '#/components/schemas/Rupiah' }
-        diskon_member: { $ref: '#/components/schemas/Rupiah' }
-        total_diskon: { $ref: '#/components/schemas/Rupiah' }
-        dpp: { $ref: '#/components/schemas/Rupiah' }
-        ppn: { $ref: '#/components/schemas/Rupiah' }
-        total: { $ref: '#/components/schemas/Rupiah' }
-        pembulatan: { $ref: '#/components/schemas/Rupiah' }
-        total_bayar: { $ref: '#/components/schemas/Rupiah' }
-        dibayar: { $ref: '#/components/schemas/Rupiah' }
-        kembalian: { $ref: '#/components/schemas/Rupiah' }
-        alasan_batal: { type: [string, 'null'] }
-        dibatalkan_oleh: { type: [string, 'null'] }
-        dibatalkan_pada: { type: [string, 'null'], format: date-time }
-
-    PemasokItem:
-      type: object
-      required: [kode, nama, kota, harga_beli, margin, margin_persen, utama]
-      properties:
-        kode: { type: string }
-        nama: { type: string }
-        kota: { type: string }
-        harga_beli: { $ref: '#/components/schemas/Rupiah' }
-        margin: { $ref: '#/components/schemas/Rupiah' }
-        margin_persen: { type: number, format: float }
-        utama: { type: boolean }
-
-    ProdukDenganPemasok:
-      type: object
-      required: [sku, nama, harga, pemasok]
-      properties:
-        sku: { type: string }
-        nama: { type: string }
-        harga: { $ref: '#/components/schemas/Rupiah' }
-        pemasok:
-          type: array
-          items: { $ref: '#/components/schemas/PemasokItem' }
-
-  responses:
-    TanpaKunci:
-      description: Header X-API-Key tidak ada atau tidak dikenal.
-      content:
-        application/json:
-          schema: { $ref: '#/components/schemas/Kesalahan' }
-          examples:
-            hilang:
-              summary: Header tidak dikirim
-              value: { kesalahan: kunci_api_hilang, pesan: Header X-API-Key wajib disertakan. }
-            tidakDikenal:
-              summary: Kunci salah
-              value: { kesalahan: kunci_api_tidak_dikenal, pesan: Kunci API tidak dikenal. }
-    PeranTidakBerwenang:
-      description: Peran pemilik kunci API tidak diizinkan melakukan aksi ini.
-      content:
-        application/json:
-          schema: { $ref: '#/components/schemas/Kesalahan' }
-          example:
-            kesalahan: peran_tidak_berwenang
-            pesan: 'Aksi ini hanya boleh dilakukan oleh: supervisor.'
-            peran_anda: kasir
-    ProdukTidakDitemukan:
-      description: SKU cocok pola, tetapi tidak ada di katalog.
-      content:
-        application/json:
-          schema: { $ref: '#/components/schemas/Kesalahan' }
-          example:
-            kesalahan: produk_tidak_ditemukan
-            pesan: Produk dengan SKU SKU-999 tidak ditemukan.
-            sku: SKU-999
-    TransaksiTidakDitemukan:
-      description: Nomor struk cocok pola, tetapi tidak ada.
-      content:
-        application/json:
-          schema: { $ref: '#/components/schemas/Kesalahan' }
-          example:
-            kesalahan: transaksi_tidak_ditemukan
-            pesan: Transaksi POS-20260914-0999 tidak ditemukan.
-            nomor: POS-20260914-0999
-    ValidasiGagal:
-      description: Bentuk masukan tidak sah.
-      content:
-        application/json:
-          schema: { $ref: '#/components/schemas/KesalahanValidasi' }
-          example:
-            message: The alasan field must be at least 5 characters.
-            errors:
-              alasan: [The alasan field must be at least 5 characters.]
-
 paths:
   /v1/pos/produk/{sku}/pemasok:
     get:
@@ -223,7 +45,9 @@ paths:
       summary: Pemasok dan margin satu produk
       description: |
         Daftar pemasok sebuah produk beserta harga beli dan margin.
-        Pemasok utama selalu berada di urutan pertama (AB-13).
+        Pemasok utama selalu berada di urutan pertama.
+        **AB-13** — harga beli dan margin adalah rahasia dagang: hanya
+        peran `supervisor` yang boleh melihatnya. Peran `kasir` ditolak 403.
       parameters:
         - $ref: '#/components/parameters/Sku'
       responses:
@@ -256,6 +80,71 @@ paths:
                       margin: 2900
                       margin_persen: 12.1
                       utama: false
-        '401': { $ref: '#/components/responses-/TanpaKunci' }
+        '401': { $ref: '#/components/responses/TanpaKunci' }
         '403': { $ref: '#/components/responses/PeranTidakBerwenang' }
         '404': { $ref: '#/components/responses/ProdukTidakDitemukan' }
+
+components:
+  securitySchemes:
+    KunciApi:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Kunci API autentikasi pengguna POS.
+
+  parameters:
+    Sku:
+      name: sku
+      in: path
+      required: true
+      description: Kode unik produk (pola SKU-xxx).
+      schema:
+        type: string
+        pattern: '^SKU-[0-9]{3}$'
+      example: SKU-004
+
+  responses:
+    TanpaKunci:
+      description: Header X-API-Key tidak ada atau tidak dikenal.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Kesalahan' }
+    PeranTidakBerwenang:
+      description: Peran pemilik kunci API tidak diizinkan melakukan aksi ini.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Kesalahan' }
+    ProdukTidakDitemukan:
+      description: SKU cocok pola, tetapi tidak ada di katalog.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Kesalahan' }
+
+  schemas:
+    Kesalahan:
+      type: object
+      required: [kesalahan, pesan]
+      properties:
+        kesalahan: { type: string }
+        pesan: { type: string }
+
+    ProdukDenganPemasok:
+      type: object
+      required: [sku, nama, harga, pemasok]
+      properties:
+        sku: { type: string }
+        nama: { type: string }
+        harga: { type: integer }
+        pemasok:
+          type: array
+          items:
+            type: object
+            required: [kode, nama, kota, harga_beli, margin, margin_persen, utama]
+            properties:
+              kode: { type: string }
+              nama: { type: string }
+              kota: { type: string }
+              harga_beli: { type: integer }
+              margin: { type: integer }
+              margin_persen: { type: number }
+              utama: { type: boolean }
