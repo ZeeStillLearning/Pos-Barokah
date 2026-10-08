@@ -13,8 +13,8 @@ Route::get('/ping', fn () => response()->json([
     'toko' => config('pos.nama_toko'),
     'waktu' => now()->toIso8601String(),
 ]))
-    ->middleware('user-agent')
     ->name('api.ping');
+
 Route::prefix('v1/pos')
     ->name('api.v1.pos.')
     ->middleware('kasir') // berlaku untuk SELURUH rute di dalam grup
@@ -27,8 +27,11 @@ Route::prefix('v1/pos')
             ->where('sku', 'SKU-[0-9]{3}')
             ->name('produk.show');
 
-        Route::post('/pratinjau', [TransaksiController::class, 'pratinjau'])
-            ->name('pratinjau');
+        // BARU — AB-13: harga beli dan margin hanya untuk supervisor.
+        Route::get('/produk/{sku}/pemasok', [ProdukController::class, 'pemasok'])
+            ->middleware('peran:supervisor')
+            ->where('sku', 'SKU-[0-9]{3}')
+            ->name('produk.pemasok');
 
         /* ---------------- Transaksi ---------------- */
         Route::get('/transaksi', [TransaksiController::class, 'index'])
@@ -37,9 +40,6 @@ Route::prefix('v1/pos')
         Route::post('/transaksi', [TransaksiController::class, 'store'])
             ->middleware('jam.buka') // tambahan khusus rute ini
             ->name('transaksi.store');
-
-        Route::post('/pratinjau', [TransaksiController::class, 'pratinjau'])
-            ->name('pratinjau');
 
         Route::get('/transaksi/{nomor}', [TransaksiController::class, 'show'])
             ->where('nomor', 'POS-[0-9]{8}-[0-9]{4}')
@@ -56,5 +56,8 @@ Route::prefix('v1/pos')
                 ->name('harian');
             Route::get('/terlaris', [LaporanController::class, 'terlaris'])
                 ->name('terlaris');
+            // BARU — penjualan per kategori (has-many-through)
+            Route::get('/kategori', [LaporanController::class, 'kategori'])
+                ->name('kategori');
         });
     });

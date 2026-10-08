@@ -6,7 +6,9 @@ namespace App\Services;
 
 use App\Domain\Uang;
 use App\Models\ItemTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 final class LayananLaporan
@@ -35,13 +37,13 @@ final class LayananLaporan
         $omzet = (int) $ringkas->omzet;
 
         return [
-            'tanggal' => $tanggal,
+            'tanggal'          => $tanggal,
             'jumlah_transaksi' => $jumlah,
-            'omzet' => $omzet,
-            'omzet_format' => (new Uang($omzet))->format(),
-            'total_diskon' => (int) $ringkas->diskon,
-            'total_ppn' => (int) $ringkas->ppn,
-            'rata_rata_struk' => $jumlah > 0 ? intdiv($omzet, $jumlah) : 0,
+            'omzet'            => $omzet,
+            'omzet_format'     => (new Uang($omzet))->format(),
+            'total_diskon'     => (int) $ringkas->diskon,
+            'total_ppn'        => (int) $ringkas->ppn,
+            'rata_rata_struk'  => $jumlah > 0 ? intdiv($omzet, $jumlah) : 0,
             'per_metode_bayar' => $perMetode,
         ];
     }
@@ -50,9 +52,7 @@ final class LayananLaporan
     public function terlaris(string $tanggal, int $batas = 5): array
     {
         return ItemTransaksi::query()
-            ->join('transaksi', 'transaksi.id', '=', 'item_transaksi.transaksi_id')
-            ->where('transaksi.status', 'selesai')
-            ->whereDate('transaksi.created_at', $tanggal)
+            ->whereIn('item_transaksi.transaksi_id', $this->idStrukSelesai($tanggal))
             ->groupBy('item_transaksi.sku', 'item_transaksi.nama_produk')
             ->orderByDesc('kuantitas')
             ->limit($batas)
@@ -60,13 +60,43 @@ final class LayananLaporan
                 'item_transaksi.sku',
                 'item_transaksi.nama_produk AS nama',
                 DB::raw('SUM(item_transaksi.kuantitas) AS kuantitas'),
-                DB::raw('SUM(item_transaksi.total) AS pendapatan'),
+                DB::raw('SUM(item_transaksi.total)     AS pendapatan'),
             ])
             ->map(static fn ($baris): array => [
-                'sku' => $baris->sku,
-                'nama' => $baris->nama,
-                'kuantitas' => (int) $baris->kuantitas,
+                'sku'        => $baris->sku,
+                'nama'       => $baris->nama,
+                'kuantitas'  => (int) $baris->kuantitas,
                 'pendapatan' => (int) $baris->pendapatan,
-            ])->all();
+            ])
+            ->all();
+    }
+
+    /**
+     * Penjualan per kategori (hasManyThrough withSum) — AB-14.
+     * @return array<int, array<string, mixed>>
+     */
+    public function perKategori(string $tanggal): array
+    {
+        $struk = $this->idStrukSelesai($tanggal);
+        $saring = fn (Builder $q) => $q->whereIn('item_transaksi.transaksi_id', $struk);
+
+        return Kategori::query()
+            ->withSum(['itemTerjual as kuantitas'  => $saring], 'item_transaksi.kuantitas')
+            ->withSum(['itemTerjual as pendapatan' => $saring], 'item_transaksi.total')
+            ->orderByDesc('pendapatan')
+            ->orderBy('kode')
+            ->get()
+            ->map(static fn (Kategori $k): array => [
+                'kode'       => $k->kode,
+                'nama'       => $k->nama,
+                'kuantitas'  => (int) $k->kuantitas,
+                'pendapatan' => (int) $k->pendapatan,
+            ])
+            ->all();
+    }
+
+    private function idStrukSelesai(string $tanggal): Builder
+    {
+        return Transaksi::query()->selesai()->tanggal($tanggal)->select('transaksi.id');
     }
 }

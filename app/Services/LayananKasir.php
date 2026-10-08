@@ -83,8 +83,7 @@ final class LayananKasir
             ? $subtotal->kurang($diskonItem)->persen((float) config('pos.member.persen'))
             : Uang::nol();
 
-        // AB-13 (latihan): diskon happy hour, dihitung dari subtotal setelah
-        // diskon grosir dan diskon member -- sama seperti pola AB-3.
+        // AB-13 (latihan): diskon happy hour
         $diskonHappyHour = $this->dalamJamHappyHour()
             ? $subtotal->kurang($diskonItem)->kurang($diskonMember)->persen((float) config('pos.happy_hour.persen'))
             : Uang::nol();
@@ -120,7 +119,13 @@ final class LayananKasir
     public function proses(array $data, string $kasir): array
     {
         return DB::transaction(function () use ($data, $kasir): array {
-            // 1. Kunci baris produk lalu periksa ulang stok (AB-8)
+            // 1. DIPINDAH KE DEPAN (Langkah 17): hitung() membaca katalog lewat cariSku()
+            //    SKU yang tidak dikenal langsung menjadi 404 ProdukTidakDitemukan.
+            $metode = MetodeBayar::from($data['metode_bayar']);
+            $member = (bool) ($data['member'] ?? false);
+            $rincian = $this->hitung($data['item'], $member);
+
+            // 2. Kunci baris produk lalu periksa ulang stoknya dalam keadaan terkunci (AB-8)
             foreach ($data['item'] as $baris) {
                 $tersedia = $this->produk->kunciStok($baris['sku']);
                 if ($baris['kuantitas'] > $tersedia) {
@@ -128,10 +133,6 @@ final class LayananKasir
                 }
             }
 
-            // 2. Hitung nilai uang
-            $metode = MetodeBayar::from($data['metode_bayar']);
-            $member = (bool) ($data['member'] ?? false);
-            $rincian = $this->hitung($data['item'], $member);
             $totalBayar = new Uang($rincian['total_bayar']);
 
             $dibayar = $metode->butuhKembalian()                       // AB-7
