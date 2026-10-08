@@ -9,6 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Menghitung jumlah kueri database selama satu permintaan, dikirim
+ * lewat header X-Jumlah-Kueri. Hanya aktif di lingkungan "local".
+ */
 final class HitungKueri
 {
     public function handle(Request $request, Closure $next): Response
