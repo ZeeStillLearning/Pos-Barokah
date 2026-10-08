@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Uang;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,8 +23,14 @@ final class Produk extends Model
 
     protected function casts(): array
     {
-        return ['harga' => 'integer', 'stok' => 'integer', 'aktif' => 'boolean'];
+        return [
+            'harga' => 'integer',
+            'stok'  => 'integer',
+            'aktif' => 'boolean',
+        ];
     }
+
+    /* ---------------- Relasi ---------------- */
 
     public function kategori(): BelongsTo
     {
@@ -35,25 +42,26 @@ final class Produk extends Model
         return $this->belongsToMany(Pemasok::class, 'pemasok_produk')
             ->as('pasokan')
             ->withPivot(['harga_beli', 'utama'])
-            ->withTimestamps();
+            ->withTimestamps()
+            ->orderByPivot('utama', 'desc')
+            ->orderByPivot('harga_beli');
     }
 
-    public function scopeAktif($query)
+    /* ---------------- Query Scope ---------------- */
+
+    public function scopeAktif(Builder $query): Builder
     {
         return $query->where('produk.aktif', true);
     }
 
-    public function scopeTersedia($query)
+    public function scopeTersedia(Builder $query): Builder
     {
         return $query->where('produk.stok', '>', 0);
     }
 
-    public function scopeKategoriKode($query, string $kode)
+    public function scopeKategoriKode(Builder $query, string $kode): Builder
     {
-        return $query->whereIn(
-            'kategori_id',
-            Kategori::query()->where('kode', $kode)->select('id'),
-        );
+        return $query->whereRelation('kategori', 'kode', $kode);
     }
 
     public function hargaFormat(): string
