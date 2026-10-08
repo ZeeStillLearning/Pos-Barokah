@@ -10,6 +10,11 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
+/**
+ * Riwayat penjualan tujuh hari terakhir: 7 x 40 = 280 struk.
+ * Memanggil LayananKasir (bukan menulis tabel langsung), sehingga
+ * seluruh aturan bisnis ikut berjalan.
+ */
 final class RiwayatPenjualanSeeder extends Seeder
 {
     private const HARI = 7;
@@ -23,13 +28,13 @@ final class RiwayatPenjualanSeeder extends Seeder
             ->orderBy('sku')
             ->pluck('sku')
             ->all();
-
         $jumlahSku = count($sku);
-        $hariIni = CarbonImmutable::today();
+        $hariIni = CarbonImmutable::today();   // dibaca SEBELUM waktu dipalsukan
 
         try {
             for ($h = self::HARI; $h >= 1; $h--) {
                 for ($i = 0; $i < self::STRUK_PER_HARI; $i++) {
+                    // Memalsukan "sekarang" HANYA untuk seeder/pengujian, jangan di kode aplikasi.
                     Carbon::setTestNow($hariIni->subDays($h)->setTime(8, 0)->addMinutes($i * 15));
 
                     $struk = $kasir->proses([
@@ -41,13 +46,13 @@ final class RiwayatPenjualanSeeder extends Seeder
                         'metode_bayar' => $i % 2 === 0 ? 'qris' : 'kartu_debit',
                     ], 'Bambang Saputra');
 
-                    if ($i % 10 === 9) {
+                    if ($i % 10 === 9) {   // satu dari sepuluh struk dibatalkan
                         $kasir->batalkan($struk['nomor'], 'Salah input kuantitas', 'Bagas Prakoso');
                     }
                 }
             }
         } finally {
-            Carbon::setTestNow();
+            Carbon::setTestNow();   // WAJIB: kembalikan jam ke waktu nyata
         }
     }
 }
