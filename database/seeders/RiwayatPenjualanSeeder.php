@@ -29,7 +29,7 @@ final class RiwayatPenjualanSeeder extends Seeder
             ->pluck('sku')
             ->all();
         $jumlahSku = count($sku);
-        $hariIni = CarbonImmutable::today();   // dibaca SEBELUM waktu dipalsukan
+        $hariIni = CarbonImmutable::today();   
 
         try {
             for ($h = self::HARI; $h >= 1; $h--) {
