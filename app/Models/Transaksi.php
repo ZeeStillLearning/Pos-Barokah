@@ -46,12 +46,6 @@ final class Transaksi extends Model
         return $query->where('transaksi.status', StatusTransaksi::Selesai);
     }
 
-    /**
-     * Struk pada satu tanggal, sebagai RENTANG waktu, bukan whereDate().
-     * Kolom yang dibungkus DATE() tidak dapat memakai indeksnya;
-     * rentang setengah terbuka memberi hasil sama dengan biaya lebih murah
-     * (dibuktikan dengan EXPLAIN pada Langkah 11).
-     */
     public function scopeTanggal(Builder $query, string $tanggal): Builder
     {
         $awal = CarbonImmutable::parse($tanggal)->startOfDay();

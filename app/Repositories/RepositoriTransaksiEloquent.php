@@ -36,7 +36,11 @@ final class RepositoriTransaksiEloquent implements RepositoriTransaksi
     public function simpan(array $transaksi): void
     {
         $item = $transaksi['item'];
-        $baris = Transaksi::create(Arr::except($transaksi, ['item', 'total_bayar_format']));
+        $baris = Transaksi::create(Arr::except($transaksi, [
+        'item',
+        'total_bayar_format',
+        'diskon_happy_hour',
+    ]));
 
         $idProduk = Produk::query()
             ->whereIn('sku', array_column($item, 'sku'))

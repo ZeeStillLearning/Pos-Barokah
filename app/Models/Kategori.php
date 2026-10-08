@@ -23,17 +23,11 @@ final class Kategori extends Model
         return ['aktif' => 'boolean'];
     }
 
-    /** Satu kategori memiliki banyak produk (one-to-many). */
     public function produk(): HasMany
     {
         return $this->hasMany(Produk::class, 'kategori_id');
     }
 
-    /**
-     * Seluruh baris struk dari produk dalam kategori ini, melompati
-     * tabel produk (has-many-through). withTrashedParents(): produk
-     * yang sudah ditarik dari rak TETAP dihitung (AB-14).
-     */
     public function itemTerjual(): HasManyThrough
     {
         return $this->hasManyThrough(

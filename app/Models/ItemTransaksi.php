@@ -33,10 +33,6 @@ final class ItemTransaksi extends Model
         return $this->belongsTo(Transaksi::class, 'transaksi_id');
     }
 
-    /**
-     * withTrashed(): baris struk tetap menunjuk produknya meski produk
-     * itu sudah ditarik dari rak. Riwayat tidak boleh kehilangan rujukan.
-     */
     public function produk(): BelongsTo
     {
         return $this->belongsTo(Produk::class, 'produk_id')->withTrashed();

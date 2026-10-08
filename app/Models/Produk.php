@@ -17,20 +17,12 @@ final class Produk extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'produk';
-
-    // "stok" sengaja tidak masuk $fillable: hanya berubah lewat LayananKasir.
     protected $fillable = ['kategori_id', 'sku', 'nama', 'harga', 'aktif'];
 
     protected function casts(): array
     {
-        return [
-            'harga' => 'integer',
-            'stok'  => 'integer',
-            'aktif' => 'boolean',
-        ];
+        return ['harga' => 'integer', 'stok' => 'integer', 'aktif' => 'boolean'];
     }
-
-    /* ---------------- Relasi ---------------- */
 
     public function kategori(): BelongsTo
     {
@@ -40,14 +32,12 @@ final class Produk extends Model
     public function pemasok(): BelongsToMany
     {
         return $this->belongsToMany(Pemasok::class, 'pemasok_produk')
-            ->as('pasokan')
+            ->as('pasokan')                          // $p->pasokan->harga_beli
             ->withPivot(['harga_beli', 'utama'])
             ->withTimestamps()
             ->orderByPivot('utama', 'desc')
             ->orderByPivot('harga_beli');
     }
-
-    /* ---------------- Query Scope ---------------- */
 
     public function scopeAktif(Builder $query): Builder
     {
@@ -61,6 +51,7 @@ final class Produk extends Model
 
     public function scopeKategoriKode(Builder $query, string $kode): Builder
     {
+        // Modul 4 memakai subquery manual. Kini cukup menyebut relasinya.
         return $query->whereRelation('kategori', 'kode', $kode);
     }
 
